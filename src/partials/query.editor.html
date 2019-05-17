@@ -1,0 +1,27 @@
+<query-editor-row query-ctrl="ctrl" can-collapse="true">
+    <div class="gf-form-inline">
+        <label class="gf-form-label query-keyword width-4">
+            Type
+        </label>
+        <div class="gf-form-select-wrapper max-width-15">
+            <select ng-model="ctrl.target.queryType" class="gf-form-input" ng-change="ctrl.onBlur()"
+                    ng-options="type for type in ctrl.queryTypes" >
+            </select>
+        </div>
+        <div class="gf-form-label gf-form-label--grow" >
+        </div>
+    </div>
+    <div class="gf-form-inline gf-form--grow" ng-show="ctrl.errors">
+        <div class="gf-form-label gf-form-label--grow text-error">
+            {{ctrl.errors}}
+        </div>
+    </div>
+    <div class="gf-form-inline gf-form--grow" ><!--ng-model="ctrl.target.currentPostAggregator.function"-->
+        <textarea type="text" class="input gf-form-input" spellcheck="false"
+                  ng-model="ctrl.target.code" ng-blur="ctrl.onBlur()"
+                  placeholder="function(field) {return value;}"
+                  style="height: 120px;font-family: Menlo, Monaco, Consolas, 'Courier New', monospace"></textarea>
+    </div>
+
+
+</query-editor-row>

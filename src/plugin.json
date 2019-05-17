@@ -1,0 +1,36 @@
+{
+  "name": "Mix & Transform",
+  "id": "mix-transform",
+  "type": "datasource",
+
+  "partials": {
+    "config": "public/app/plugins/datasource/simplejson/partials/config.html"
+  },
+
+  "mixed": true,
+  "metrics": true,
+  "annotations": false,
+
+  "info": {
+    "description": "simple json datasource",
+    "author": {
+      "name": "LiquidM",
+      "url": "https://grafana.com"
+    },
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {"name": "GitHub", "url": "https://github.com/liquidm/grafana-mixtransform"},
+      {"name": "MIT License", "url": "https://github.com/liquidm/grafana-mixtransform/blob/master/LICENSE"}
+    ],
+    "version": "1.0.0",
+    "updated": "2019-05-10"
+  },
+
+  "dependencies": {
+    "grafanaVersion": "4.x.x",
+    "plugins": [ ]
+  }
+}
