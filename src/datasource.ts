@@ -9,7 +9,7 @@ export default class MixTransformDatasource {
     backendSrv: any;
     templateSrv: any;
     datasourceSrv: any;
-    transformers: [];
+    transformers: any = {};
 
     /** @ngInject */
     constructor(instanceSettings, $q, backendSrv, templateSrv, datasourceSrv) {
@@ -23,11 +23,11 @@ export default class MixTransformDatasource {
 
     query(options) {
         const sets = _.groupBy(options.targets, 'datasource');
-        this.transformers = [];
+        this.transformers[options.panelId] = [];
         const promises = _.map(sets, targets => {
             const dsName = targets[0].datasource;
             if (dsName === this.instanceSettings.name) {
-                this.transformers = targets;
+                this.transformers[options.panelId] = targets;
                 return undefined;
             }
 
@@ -41,7 +41,7 @@ export default class MixTransformDatasource {
         return this.q.all(promises).then(results => {
             let data = _.flatten(_.map(results, 'data'));
             if (data && data.length > 0) {
-                _.forEach(this.transformers, t => {
+                _.forEach(this.transformers[options.panelId], t => {
                     if (t.queryType === 'each') {
                         if (_.find(data, d => Number.isInteger(parseInt(d.target)))) {
                             this.transformEachWithArray(t, data);

@@ -14,6 +14,7 @@ System.register(["lodash", "angular"], function (exports_1, context_1) {
         execute: function () {
             MixTransformDatasource = (function () {
                 function MixTransformDatasource(instanceSettings, $q, backendSrv, templateSrv, datasourceSrv) {
+                    this.transformers = {};
                     this.instanceSettings = instanceSettings;
                     this.instanceSettings.jsonData = this.instanceSettings.jsonData || {};
                     this.backendSrv = backendSrv;
@@ -24,11 +25,11 @@ System.register(["lodash", "angular"], function (exports_1, context_1) {
                 MixTransformDatasource.prototype.query = function (options) {
                     var _this = this;
                     var sets = lodash_1.default.groupBy(options.targets, 'datasource');
-                    this.transformers = [];
+                    this.transformers[options.panelId] = [];
                     var promises = lodash_1.default.map(sets, function (targets) {
                         var dsName = targets[0].datasource;
                         if (dsName === _this.instanceSettings.name) {
-                            _this.transformers = targets;
+                            _this.transformers[options.panelId] = targets;
                             return undefined;
                         }
                         return _this.datasourceSrv.get(dsName).then(function (ds) {
@@ -40,7 +41,7 @@ System.register(["lodash", "angular"], function (exports_1, context_1) {
                     return this.q.all(promises).then(function (results) {
                         var data = lodash_1.default.flatten(lodash_1.default.map(results, 'data'));
                         if (data && data.length > 0) {
-                            lodash_1.default.forEach(_this.transformers, function (t) {
+                            lodash_1.default.forEach(_this.transformers[options.panelId], function (t) {
                                 if (t.queryType === 'each') {
                                     if (lodash_1.default.find(data, function (d) { return Number.isInteger(parseInt(d.target)); })) {
                                         _this.transformEachWithArray(t, data);
