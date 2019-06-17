@@ -41,12 +41,13 @@ export default class MixTransformDatasource {
                 let timeshift = _.find(this.transformers[options.panelId], v => v.timeshiftValue);
                 if (timeshift) {
                     this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
+                    let timeshiftValue = this.templateSrv.replace(timeshift.timeshiftValue);
                     r.push(
                         this.datasourceSrv.get(name).then(ds => {
                             const opt = angular.copy(options);
                             opt.targets = targets;
-                            opt.range.from.subtract(parseDuration(timeshift.timeshiftValue), 'ms');
-                            opt.range.to.subtract(parseDuration(timeshift.timeshiftValue), 'ms');
+                            opt.range.from.subtract(parseDuration(timeshiftValue), 'ms');
+                            opt.range.to.subtract(parseDuration(timeshiftValue), 'ms');
                             return ds.query(opt);
                         })
                     )
