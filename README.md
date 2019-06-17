@@ -33,6 +33,9 @@ function callback(datasource, data) { ... }
 
 ### Known limitations
 
-- It's not possible to change the datasource from built-in `-- Mix --` or another datasource.
+- Only the first timeshift is applied, it's not possible to add several shifts. 
+- Only timeshift in the past is possible
+- In Grafana 5.x it's not possible to change the datasource from built-in `-- Mix --` or another datasource.
 The `Mix & Transform` should be selected before adding any other datasource. 
-Otherwise existing datasource [will be broken](https://github.com/grafana/grafana/blob/986f6689de67429a9265ff5fa5a3415796162d5f/public/app/features/panel/metrics_tab.ts#L92-L95).  
+Otherwise existing datasource [will be broken](https://github.com/grafana/grafana/blob/986f6689de67429a9265ff5fa5a3415796162d5f/public/app/features/panel/metrics_tab.ts#L92-L95).
+In Grafana 6.x it's no longer an issue  

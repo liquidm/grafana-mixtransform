@@ -5,6 +5,7 @@ export default class MixTransformDatasource {
     templateSrv: any;
     datasourceSrv: any;
     transformers: any;
+    timeshiftSuffixes: any;
     constructor(instanceSettings: any, $q: any, backendSrv: any, templateSrv: any, datasourceSrv: any);
     query(options: any): any;
     transformEachWithObjects(transformer: any, data: any): void;
