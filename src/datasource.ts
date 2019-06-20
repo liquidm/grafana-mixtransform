@@ -32,7 +32,7 @@ export default class MixTransformDatasource {
             .flatMap(targets => {
                 let r = [];
                 r.push(
-                    this.datasourceSrv.get(name).then(ds => {
+                    this.datasourceSrv.get(targets[0].datasource).then(ds => {
                         const opt = angular.copy(options);
                         opt.targets = targets;
                         return ds.query(opt);
@@ -43,7 +43,7 @@ export default class MixTransformDatasource {
                     this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
                     let timeshiftValue = this.templateSrv.replace(timeshift.timeshiftValue);
                     r.push(
-                        this.datasourceSrv.get(name).then(ds => {
+                        this.datasourceSrv.get(targets[0].datasource).then(ds => {
                             const opt = angular.copy(options);
                             opt.targets = targets;
                             opt.range.from.subtract(parseDuration(timeshiftValue), 'ms');
@@ -53,8 +53,7 @@ export default class MixTransformDatasource {
                     )
                 }
                 return r;
-            })
-            .filter(e => e);
+            });
 
         return this.q.all(promises).then(results => {
             let data = _.flatten(_.map(results, 'data'));

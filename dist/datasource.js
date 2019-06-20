@@ -34,7 +34,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         .filter(sets, function (targets, name) { return name !== _this.instanceSettings.name; })
                         .flatMap(function (targets) {
                         var r = [];
-                        r.push(_this.datasourceSrv.get(name).then(function (ds) {
+                        r.push(_this.datasourceSrv.get(targets[0].datasource).then(function (ds) {
                             var opt = angular_1.default.copy(options);
                             opt.targets = targets;
                             return ds.query(opt);
@@ -43,7 +43,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         if (timeshift) {
                             _this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
                             var timeshiftValue_1 = _this.templateSrv.replace(timeshift.timeshiftValue);
-                            r.push(_this.datasourceSrv.get(name).then(function (ds) {
+                            r.push(_this.datasourceSrv.get(targets[0].datasource).then(function (ds) {
                                 var opt = angular_1.default.copy(options);
                                 opt.targets = targets;
                                 opt.range.from.subtract(parseDuration_1.default(timeshiftValue_1), 'ms');
@@ -52,8 +52,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                             }));
                         }
                         return r;
-                    })
-                        .filter(function (e) { return e; });
+                    });
                     return this.q.all(promises).then(function (results) {
                         var data = lodash_1.default.flatten(lodash_1.default.map(results, 'data'));
                         if (data && data.length > 0) {
