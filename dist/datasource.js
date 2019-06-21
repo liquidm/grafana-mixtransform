@@ -84,7 +84,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                                     }
                                 }
                                 else if (t.queryType === 'callback') {
-                                    _this.transformCallback(t, data);
+                                    data = _this.transformCallback(t, data);
                                 }
                             });
                         }
@@ -95,7 +95,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                     if (lodash_1.default.find(data, function (d) { return d.target.indexOf(':') >= 0; }))
                         return;
                     var body = lodash_1.default.reduce(data, function (ac, v) { return ac + ("let " + v.target + " = values." + v.target + "; "); }, '') + '\n' +
-                        transformer.code + ';\n' +
+                        this.templateSrv.replace(transformer.code) + ';\n' +
                         lodash_1.default.reduce(data, function (ac, v) { return ac + ("values." + v.target + " = " + v.target + "; "); }, '') +
                         'return values;';
                     this.transformEach(transformer, data, body);
@@ -103,7 +103,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                 MixTransformDatasource.prototype.transformEachWithArray = function (transformer, data) {
                     if (lodash_1.default.find(data, function (d) { return d.target.indexOf(':') >= 0; }))
                         return;
-                    var body = transformer.code + ';\n' +
+                    var body = this.templateSrv.replace(transformer.code) + ';\n' +
                         'return values;';
                     this.transformEach(transformer, data, body);
                 };
@@ -132,8 +132,86 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                     });
                 };
                 MixTransformDatasource.prototype.transformCallback = function (transformer, data) {
-                    var f = new Function('datasource', 'data', transformer.code);
-                    f.apply(transformer, [this, data]);
+                    var f = new Function('datasource', 'data', lodash_1.default.reduce(MixTransformDatasource.injection, function (a, v, k) { return a + (k + " = " + v.toString() + "\n"); }, '') +
+                        this.templateSrv.replace(transformer.code));
+                    var res = f.apply(transformer, [this, data]);
+                    return res ? res : data;
+                };
+                MixTransformDatasource.injection = {
+                    movingAverage: function (datapoints, depth) {
+                        var res = [];
+                        for (var i = 0; i < datapoints.length; i++) {
+                            res[i] = [0, datapoints[i][1]];
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                res[i][0] += datapoints[i - j][0];
+                            }
+                            res[i][0] /= Math.min(i + 1, depth);
+                        }
+                        return res;
+                    },
+                    movingAverageRange: function (datapoints, depth) {
+                        var res = {};
+                        res.raw = [];
+                        res.average = [];
+                        res.high = [];
+                        res.low = [];
+                        for (var i = 0; i < datapoints.length; i++) {
+                            res.raw[i] = [datapoints[i][0], datapoints[i][1]];
+                            res.average[i] = [0, datapoints[i][1]];
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                res.average[i][0] += datapoints[i - j][0];
+                            }
+                            res.average[i][0] /= Math.min(i + 1, depth);
+                            var dev = 0;
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2);
+                            }
+                            dev = Math.sqrt(dev / Math.min(i + 1, depth));
+                            res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
+                            res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                        }
+                        return this['_'].reduce(res, function (a, v, k) { a.push({ target: k, datapoints: v }); return a; }, []);
+                    },
+                    movingWAverage: function (datapoints, depth) {
+                        var res = [];
+                        for (var i = 0; i < datapoints.length; i++) {
+                            res[i] = [0, datapoints[i][1]];
+                            var sum = 0;
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                res[i][0] += datapoints[i - j][0] * (depth - j);
+                                sum += depth - j;
+                            }
+                            res[i][0] /= sum;
+                        }
+                        return res;
+                    },
+                    movingWAverageRange: function (datapoints, depth) {
+                        var res = {};
+                        res.raw = [];
+                        res.average = [];
+                        res.high = [];
+                        res.low = [];
+                        for (var i = 0; i < datapoints.length; i++) {
+                            res.raw[i] = [datapoints[i][0], datapoints[i][1]];
+                            res.average[i] = [0, datapoints[i][1]];
+                            var sum = 0;
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                res.average[i][0] += datapoints[i - j][0] * (depth - j);
+                                sum += depth - j;
+                            }
+                            res.average[i][0] /= sum;
+                            var dev = 0;
+                            sum = 0;
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2) * (depth - j);
+                                sum += depth - j;
+                            }
+                            dev = Math.sqrt(dev / Math.min(i + 1, sum * (Math.min(i + 1, depth) - 1) / Math.min(i + 1, depth)));
+                            res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
+                            res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                        }
+                        return this['_'].reduce(res, function (a, v, k) { a.push({ target: k, datapoints: v }); return a; }, []);
+                    }
                 };
                 return MixTransformDatasource;
             }());

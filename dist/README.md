@@ -24,6 +24,22 @@ Executes the callback once for the whole `data` object
 ```
 function callback(datasource, data) { ... }
 ```
+### Moving average
+Use with query type `Callback`.
+Standard moving average:
+```
+_.forEach(data, series => {
+  series.datapoints = movingAverage(series.datapoints, $depth);
+})
+```
+Moving average range with +/- std deviation for the first series:
+```
+if (data.length > 0) {
+  return window.movingAverageRange(data[0].datapoints, $depth);
+}
+```
+Weighted versions `movingWAverage` and `movingWAverageRange` use decremental 
+weights for the previous datapoings - depth, depth - 1, ..., 1. 
 
 
 ### Hints

@@ -11,5 +11,6 @@ export default class MixTransformDatasource {
     transformEachWithObjects(transformer: any, data: any): void;
     transformEachWithArray(transformer: any, data: any): void;
     transformEach(transformer: any, data: any, body: any): void;
-    transformCallback(transformer: any, data: any): void;
+    transformCallback(transformer: any, data: any): any;
+    static readonly injection: any;
 }

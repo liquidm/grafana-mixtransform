@@ -87,7 +87,7 @@ export default class MixTransformDatasource {
                             this.transformEachWithObjects(t, data);
                         }
                     } else if (t.queryType === 'callback') {
-                        this.transformCallback(t, data)
+                        data = this.transformCallback(t, data)
                     }
                 });
             }
@@ -99,7 +99,7 @@ export default class MixTransformDatasource {
         if (_.find(data, d => d.target.indexOf(':') >= 0)) return;
         let body =
             _.reduce(data, (ac, v) => ac + `let ${v.target} = values.${v.target}; `, '') + '\n' +
-            transformer.code + ';\n' +
+            this.templateSrv.replace(transformer.code) + ';\n' +
             _.reduce(data, (ac, v) => ac + `values.${v.target} = ${v.target}; `, '') +
             'return values;';
         this.transformEach(transformer, data, body);
@@ -108,7 +108,7 @@ export default class MixTransformDatasource {
     transformEachWithArray(transformer, data) {
         if (_.find(data, d => d.target.indexOf(':') >= 0)) return;
         let body =
-            transformer.code + ';\n' +
+            this.templateSrv.replace(transformer.code) + ';\n' +
             'return values;';
         this.transformEach(transformer, data, body);
     }
@@ -137,8 +137,89 @@ export default class MixTransformDatasource {
     }
 
     transformCallback(transformer, data) {
-        let f = new Function('datasource', 'data', transformer.code);
-        f.apply(transformer, [this, data]);
+        let f = new Function('datasource', 'data',
+            _.reduce(MixTransformDatasource.injection, (a, v, k) => a + `${k} = ${v.toString()}\n`, '') +
+            this.templateSrv.replace(transformer.code));
+        let res = f.apply(transformer, [this, data]);
+        return res ? res : data;
     }
+
+    public static readonly injection: any = {
+        movingAverage: function (datapoints, depth) {
+            let res = [];
+            for (let i = 0; i < datapoints.length; i++) {
+                res[i] = [0, datapoints[i][1]];
+                for (let j = 0; j < depth && i - j >= 0; j++) {
+                    res[i][0] += datapoints[i - j][0];
+                }
+                res[i][0] /= Math.min(i + 1, depth);
+            }
+            return res;
+        },
+        movingAverageRange: function (datapoints, depth) {
+            let res: any = {};
+            res.raw = [];
+            res.average = [];
+            res.high = [];
+            res.low = [];
+            for (let i = 0; i < datapoints.length; i++) {
+                res.raw[i] = [datapoints[i][0], datapoints[i][1]];
+                res.average[i] = [0, datapoints[i][1]];
+                for (let j = 0; j < depth && i - j >= 0; j++) {
+                    res.average[i][0] += datapoints[i - j][0];
+                }
+                res.average[i][0] /= Math.min(i + 1, depth);
+                let dev = 0;
+                for (let j = 0; j < depth && i - j >= 0; j++) {
+                    dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2);
+                }
+                dev = Math.sqrt(dev / Math.min(i + 1, depth));
+                res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
+                res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+            }
+            return this['_'].reduce(res, (a, v, k) => {a.push({target: k, datapoints: v}); return a;}, []);
+        },
+        movingWAverage: function (datapoints, depth) {
+            let res = [];
+            for (let i = 0; i < datapoints.length; i++) {
+                res[i] = [0, datapoints[i][1]];
+                let sum = 0;
+                for (let j = 0; j < depth && i - j >= 0; j++) {
+                    res[i][0] += datapoints[i - j][0] * (depth - j);
+                    sum += depth - j;
+                }
+                res[i][0] /= sum;
+            }
+            return res;
+        },
+        movingWAverageRange: function (datapoints, depth) {
+            let res: any = {};
+            res.raw = [];
+            res.average = [];
+            res.high = [];
+            res.low = [];
+            for (let i = 0; i < datapoints.length; i++) {
+                res.raw[i] = [datapoints[i][0], datapoints[i][1]];
+                res.average[i] = [0, datapoints[i][1]];
+                let sum = 0;
+                for (let j = 0; j < depth && i - j >= 0; j++) {
+                    res.average[i][0] += datapoints[i - j][0] * (depth - j);
+                    sum += depth - j;
+                }
+                res.average[i][0] /= sum;
+                let dev = 0;
+                sum = 0;
+                for (let j = 0; j < depth && i - j >= 0; j++) {
+                    dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2) * (depth - j);
+                    sum += depth - j;
+                }
+                dev = Math.sqrt(dev / Math.min(i + 1, sum * (Math.min(i + 1, depth) - 1) / Math.min(i + 1, depth)));
+                res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
+                res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+            }
+            // this['_'] is intentional, just _ will be replaced by compiler
+            return this['_'].reduce(res, (a, v, k) => {a.push({target: k, datapoints: v}); return a;}, []);
+        }
+    };
 
 }
