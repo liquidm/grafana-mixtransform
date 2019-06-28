@@ -39,7 +39,7 @@ export default class MixTransformDatasource {
                     })
                 );
                 let timeshift = _.find(this.transformers[options.panelId], v => v.timeshiftValue);
-                if (timeshift) {
+                if (timeshift && timeshift != 'none') {
                     this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
                     let timeshiftValue = this.templateSrv.replace(timeshift.timeshiftValue);
                     r.push(
