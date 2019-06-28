@@ -38,8 +38,8 @@ export default class MixTransformDatasource {
                         return ds.query(opt);
                     })
                 );
-                let timeshift = _.find(this.transformers[options.panelId], v => v.timeshiftValue);
-                if (timeshift && timeshift != 'none') {
+                let timeshift = _.find(this.transformers[options.panelId], v => v.timeshiftValue && v.timeshiftValue !== 'none');
+                if (timeshift) {
                     this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
                     let timeshiftValue = this.templateSrv.replace(timeshift.timeshiftValue);
                     r.push(

@@ -39,8 +39,8 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                             opt.targets = targets;
                             return ds.query(opt);
                         }));
-                        var timeshift = lodash_1.default.find(_this.transformers[options.panelId], function (v) { return v.timeshiftValue; });
-                        if (timeshift && timeshift != 'none') {
+                        var timeshift = lodash_1.default.find(_this.transformers[options.panelId], function (v) { return v.timeshiftValue && v.timeshiftValue !== 'none'; });
+                        if (timeshift) {
                             _this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
                             var timeshiftValue_1 = _this.templateSrv.replace(timeshift.timeshiftValue);
                             r.push(_this.datasourceSrv.get(targets[0].datasource).then(function (ds) {
