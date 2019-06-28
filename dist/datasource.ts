@@ -38,19 +38,21 @@ export default class MixTransformDatasource {
                         return ds.query(opt);
                     })
                 );
-                let timeshift = _.find(this.transformers[options.panelId], v => v.timeshiftValue && v.timeshiftValue !== 'none');
+                let timeshift = _.find(this.transformers[options.panelId], v => v.timeshiftValue);
                 if (timeshift) {
-                    this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
                     let timeshiftValue = this.templateSrv.replace(timeshift.timeshiftValue);
-                    r.push(
-                        this.datasourceSrv.get(targets[0].datasource).then(ds => {
-                            const opt = angular.copy(options);
-                            opt.targets = targets;
-                            opt.range.from.subtract(parseDuration(timeshiftValue), 'ms');
-                            opt.range.to.subtract(parseDuration(timeshiftValue), 'ms');
-                            return ds.query(opt);
-                        })
-                    )
+                    if (timeshiftValue !== 'none') {
+                        this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
+                        r.push(
+                            this.datasourceSrv.get(targets[0].datasource).then(ds => {
+                                const opt = angular.copy(options);
+                                opt.targets = targets;
+                                opt.range.from.subtract(parseDuration(timeshiftValue), 'ms');
+                                opt.range.to.subtract(parseDuration(timeshiftValue), 'ms');
+                                return ds.query(opt);
+                            })
+                        )
+                    }
                 }
                 return r;
             });

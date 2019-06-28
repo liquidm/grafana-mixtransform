@@ -39,17 +39,19 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                             opt.targets = targets;
                             return ds.query(opt);
                         }));
-                        var timeshift = lodash_1.default.find(_this.transformers[options.panelId], function (v) { return v.timeshiftValue && v.timeshiftValue !== 'none'; });
+                        var timeshift = lodash_1.default.find(_this.transformers[options.panelId], function (v) { return v.timeshiftValue; });
                         if (timeshift) {
-                            _this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
                             var timeshiftValue_1 = _this.templateSrv.replace(timeshift.timeshiftValue);
-                            r.push(_this.datasourceSrv.get(targets[0].datasource).then(function (ds) {
-                                var opt = angular_1.default.copy(options);
-                                opt.targets = targets;
-                                opt.range.from.subtract(parseDuration_1.default(timeshiftValue_1), 'ms');
-                                opt.range.to.subtract(parseDuration_1.default(timeshiftValue_1), 'ms');
-                                return ds.query(opt);
-                            }));
+                            if (timeshiftValue_1 !== 'none') {
+                                _this.timeshiftSuffixes[options.panelId] = timeshift.timeshiftSuffix || '_previous';
+                                r.push(_this.datasourceSrv.get(targets[0].datasource).then(function (ds) {
+                                    var opt = angular_1.default.copy(options);
+                                    opt.targets = targets;
+                                    opt.range.from.subtract(parseDuration_1.default(timeshiftValue_1), 'ms');
+                                    opt.range.to.subtract(parseDuration_1.default(timeshiftValue_1), 'ms');
+                                    return ds.query(opt);
+                                }));
+                            }
                         }
                         return r;
                     });
