@@ -174,6 +174,34 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         }
                         return this['_'].reduce(res, function (a, v, k) { a.push({ target: k, datapoints: v }); return a; }, []);
                     },
+                    movingAverageRatioRange: function (data, dividend, divisor, name, depth) {
+                        var res = {};
+                        res.raw = [];
+                        res.average = [];
+                        res.high = [];
+                        res.low = [];
+                        var dividendTarget = data.find(function (v) { return v.target === dividend; }), divisorTarget = data.find(function (v) { return v.target === divisor; });
+                        if (!dividendTarget || !divisorTarget)
+                            return { target: name, datapoints: [] };
+                        var dpDividend = dividendTarget.datapoints, dpDivisor = divisorTarget.datapoints;
+                        for (var i = 0; i < dpDividend.length; i++) {
+                            res.raw[i] = [dpDividend[i][0] / dpDivisor[i][0], dpDividend[i][1]];
+                            var sumDividend = dpDividend[i][0], sumDivisor = dpDivisor[i][0];
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                sumDividend += dpDividend[i - j][0];
+                                sumDivisor += dpDivisor[i - j][0];
+                            }
+                            res.average[i] = [sumDividend / sumDivisor, dpDividend[i][1]];
+                            var dev = 0;
+                            for (var j = 0; j < depth && i - j >= 0; j++) {
+                                dev += Math.pow(res.average[i][0] - res.raw[i - j][0], 2);
+                            }
+                            dev = Math.sqrt(dev / Math.min(i + 1, depth));
+                            res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
+                            res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                        }
+                        return this['_'].reduce(res, function (a, v, k) { a.push({ target: name + '_' + k, datapoints: v }); return a; }, []);
+                    },
                     movingWAverage: function (datapoints, depth) {
                         var res = [];
                         for (var i = 0; i < datapoints.length; i++) {
