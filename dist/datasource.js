@@ -174,7 +174,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         }
                         return this['_'].reduce(res, function (a, v, k) { a.push({ target: k, datapoints: v }); return a; }, []);
                     },
-                    movingAverageRatioRange: function (data, dividend, divisor, name, depth) {
+                    movingAverageRatioRange: function (data, dividend, divisor, koef, name, depth) {
                         var res = {};
                         res.raw = [];
                         res.average = [];
@@ -185,13 +185,13 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                             return { target: name, datapoints: [] };
                         var dpDividend = dividendTarget.datapoints, dpDivisor = divisorTarget.datapoints;
                         for (var i = 0; i < dpDividend.length; i++) {
-                            res.raw[i] = [dpDividend[i][0] / dpDivisor[i][0], dpDividend[i][1]];
+                            res.raw[i] = [dpDividend[i][0] / dpDivisor[i][0] * koef, dpDividend[i][1]];
                             var sumDividend = dpDividend[i][0], sumDivisor = dpDivisor[i][0];
                             for (var j = 0; j < depth && i - j >= 0; j++) {
                                 sumDividend += dpDividend[i - j][0];
                                 sumDivisor += dpDivisor[i - j][0];
                             }
-                            res.average[i] = [sumDividend / sumDivisor, dpDividend[i][1]];
+                            res.average[i] = [sumDividend / sumDivisor * koef, dpDividend[i][1]];
                             var dev = 0;
                             for (var j = 0; j < depth && i - j >= 0; j++) {
                                 dev += Math.pow(res.average[i][0] - res.raw[i - j][0], 2);

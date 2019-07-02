@@ -182,7 +182,7 @@ export default class MixTransformDatasource {
             // this['_'] is intentional, just _ will be replaced by compiler
             return this['_'].reduce(res, (a, v, k) => {a.push({target: k, datapoints: v}); return a;}, []);
         },
-        movingAverageRatioRange: function (data, dividend, divisor, name, depth) {
+        movingAverageRatioRange: function (data, dividend, divisor, koef, name, depth) {
             let res: any = {};
             res.raw = [];
             res.average = [];
@@ -194,14 +194,14 @@ export default class MixTransformDatasource {
             let dpDividend = dividendTarget.datapoints,
                 dpDivisor = divisorTarget.datapoints;
             for (let i = 0; i < dpDividend.length; i++) {
-                res.raw[i] = [dpDividend[i][0] / dpDivisor[i][0], dpDividend[i][1]];
+                res.raw[i] = [dpDividend[i][0] / dpDivisor[i][0] * koef, dpDividend[i][1]];
                 let sumDividend = dpDividend[i][0],
                     sumDivisor = dpDivisor[i][0];
                 for (let j = 0; j < depth && i - j >= 0; j++) {
                     sumDividend += dpDividend[i - j][0];
                     sumDivisor += dpDivisor[i - j][0];
                 }
-                res.average[i] = [sumDividend / sumDivisor, dpDividend[i][1]];
+                res.average[i] = [sumDividend / sumDivisor * koef, dpDividend[i][1]];
                 let dev = 0;
                 for (let j = 0; j < depth && i - j >= 0; j++) {
                     dev += Math.pow(res.average[i][0] - res.raw[i - j][0], 2);
