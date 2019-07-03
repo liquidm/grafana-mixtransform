@@ -195,8 +195,8 @@ export default class MixTransformDatasource {
                 dpDivisor = divisorTarget.datapoints;
             for (let i = 0; i < dpDividend.length; i++) {
                 res.raw[i] = [dpDividend[i][0] / dpDivisor[i][0] * koef, dpDividend[i][1]];
-                let sumDividend = dpDividend[i][0],
-                    sumDivisor = dpDivisor[i][0];
+                let sumDividend = 0,
+                    sumDivisor = 0;
                 for (let j = 0; j < depth && i - j >= 0; j++) {
                     sumDividend += dpDividend[i - j][0];
                     sumDivisor += dpDivisor[i - j][0];
@@ -250,7 +250,6 @@ export default class MixTransformDatasource {
                 if (i < 2) {
                     dev = 0;
                 } else {
-                    debugger;
                     dev = Math.sqrt(dev /
                         ((Math.min(i, depth - 1) - 1) / Math.min(i, depth - 1) * sum)
                     );
@@ -260,6 +259,47 @@ export default class MixTransformDatasource {
             }
             // this['_'] is intentional, just _ will be replaced by compiler
             return this['_'].reduce(res, (a, v, k) => {a.push({target: k, datapoints: v}); return a;}, []);
+        },
+        movingWAverageRatioRange: function (data, dividend, divisor, koef, name, depth) {
+            let res: any = {};
+            res.raw = [];
+            res.average = [];
+            res.high = [];
+            res.low = [];
+            let dividendTarget = data.find(v => v.target === dividend),
+                divisorTarget = data.find(v => v.target === divisor);
+            if (!dividendTarget || !divisorTarget) return {target: name, datapoints: []};
+            let dpDividend = dividendTarget.datapoints,
+                dpDivisor = divisorTarget.datapoints;
+            for (let i = 0; i < dpDividend.length; i++) {
+                res.raw[i] = [dpDividend[i][0] / dpDivisor[i][0] * koef, dpDividend[i][1]];
+                let sumDividend = 0,
+                    sumDivisor = 0;
+                let sum = 0;
+                for (let j = 0; j < depth && i - j >= 0; j++) {
+                    sumDividend += dpDividend[i - j][0] * (depth - j);
+                    sumDivisor += dpDivisor[i - j][0] * (depth - j);
+                    sum += depth - j;
+                }
+                res.average[i] = [sumDividend / sumDivisor * koef, dpDividend[i][1]];
+                let dev = 0;
+                sum = 0;
+                for (let j = 1; j < (depth - 1) && i - j >= 0; j++) {
+                    dev += Math.pow(res.average[i][0] - res.raw[i - j][0], 2) * ((depth - 1) - j);
+                    sum += (depth - 1) - j;
+                }
+                if (i < 2) {
+                    dev = 0;
+                } else {
+                    dev = Math.sqrt(dev /
+                        ((Math.min(i, depth - 1) - 1) / Math.min(i, depth - 1) * sum)
+                    );
+                }
+                res.high[i] = [res.average[i][0] + dev / 2, res.raw[i][1]];
+                res.low[i] = [res.average[i][0] - dev / 2, res.raw[i][1]];
+            }
+            // this['_'] is intentional, just _ will be replaced by compiler
+            return this['_'].reduce(res, (a, v, k) => {a.push({target: name + '_' + k, datapoints: v}); return a;}, []);
         }
     };
 
