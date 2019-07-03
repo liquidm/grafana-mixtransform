@@ -176,8 +176,8 @@ export default class MixTransformDatasource {
                     dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2);
                 }
                 dev = Math.sqrt(dev / Math.min(i + 1, depth));
-                res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
-                res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                res.high[i] = [res.average[i][0] + dev/2, res.raw[i][1]];
+                res.low[i] = [res.average[i][0] - dev/2, res.raw[i][1]];
             }
             // this['_'] is intentional, just _ will be replaced by compiler
             return this['_'].reduce(res, (a, v, k) => {a.push({target: k, datapoints: v}); return a;}, []);
@@ -207,8 +207,8 @@ export default class MixTransformDatasource {
                     dev += Math.pow(res.average[i][0] - res.raw[i - j][0], 2);
                 }
                 dev = Math.sqrt(dev / Math.min(i + 1, depth));
-                res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
-                res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                res.high[i] = [res.average[i][0] + dev/2, res.raw[i][1]];
+                res.low[i] = [res.average[i][0] - dev/2, res.raw[i][1]];
             }
             // this['_'] is intentional, just _ will be replaced by compiler
             return this['_'].reduce(res, (a, v, k) => {a.push({target: name + '_' + k, datapoints: v}); return a;}, []);
@@ -243,13 +243,20 @@ export default class MixTransformDatasource {
                 res.average[i][0] /= sum;
                 let dev = 0;
                 sum = 0;
-                for (let j = 0; j < depth && i - j >= 0; j++) {
-                    dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2) * (depth - j);
-                    sum += depth - j;
+                for (let j = 1; j < (depth - 1) && i - j >= 0; j++) {
+                    dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2) * ((depth - 1) - j);
+                    sum += (depth - 1) - j;
                 }
-                dev = Math.sqrt(dev / Math.min(i + 1, sum * (Math.min(i + 1, depth) - 1) / Math.min(i + 1, depth)));
-                res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
-                res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                if (i < 2) {
+                    dev = 0;
+                } else {
+                    debugger;
+                    dev = Math.sqrt(dev /
+                        ((Math.min(i, depth - 1) - 1) / Math.min(i, depth - 1) * sum)
+                    );
+                }
+                res.high[i] = [res.average[i][0] + dev / 2, res.raw[i][1]];
+                res.low[i] = [res.average[i][0] - dev / 2, res.raw[i][1]];
             }
             // this['_'] is intentional, just _ will be replaced by compiler
             return this['_'].reduce(res, (a, v, k) => {a.push({target: k, datapoints: v}); return a;}, []);

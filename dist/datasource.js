@@ -169,8 +169,8 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                                 dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2);
                             }
                             dev = Math.sqrt(dev / Math.min(i + 1, depth));
-                            res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
-                            res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                            res.high[i] = [res.average[i][0] + dev / 2, res.raw[i][1]];
+                            res.low[i] = [res.average[i][0] - dev / 2, res.raw[i][1]];
                         }
                         return this['_'].reduce(res, function (a, v, k) { a.push({ target: k, datapoints: v }); return a; }, []);
                     },
@@ -197,8 +197,8 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                                 dev += Math.pow(res.average[i][0] - res.raw[i - j][0], 2);
                             }
                             dev = Math.sqrt(dev / Math.min(i + 1, depth));
-                            res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
-                            res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                            res.high[i] = [res.average[i][0] + dev / 2, res.raw[i][1]];
+                            res.low[i] = [res.average[i][0] - dev / 2, res.raw[i][1]];
                         }
                         return this['_'].reduce(res, function (a, v, k) { a.push({ target: name + '_' + k, datapoints: v }); return a; }, []);
                     },
@@ -232,13 +232,20 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                             res.average[i][0] /= sum;
                             var dev = 0;
                             sum = 0;
-                            for (var j = 0; j < depth && i - j >= 0; j++) {
-                                dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2) * (depth - j);
-                                sum += depth - j;
+                            for (var j = 1; j < (depth - 1) && i - j >= 0; j++) {
+                                dev += Math.pow(res.average[i][0] - datapoints[i - j][0], 2) * ((depth - 1) - j);
+                                sum += (depth - 1) - j;
                             }
-                            dev = Math.sqrt(dev / Math.min(i + 1, sum * (Math.min(i + 1, depth) - 1) / Math.min(i + 1, depth)));
-                            res.high[i] = [res.average[i][0] + dev, res.raw[i][1]];
-                            res.low[i] = [res.average[i][0] - dev, res.raw[i][1]];
+                            if (i < 2) {
+                                dev = 0;
+                            }
+                            else {
+                                debugger;
+                                dev = Math.sqrt(dev /
+                                    ((Math.min(i, depth - 1) - 1) / Math.min(i, depth - 1) * sum));
+                            }
+                            res.high[i] = [res.average[i][0] + dev / 2, res.raw[i][1]];
+                            res.low[i] = [res.average[i][0] - dev / 2, res.raw[i][1]];
                         }
                         return this['_'].reduce(res, function (a, v, k) { a.push({ target: k, datapoints: v }); return a; }, []);
                     }
