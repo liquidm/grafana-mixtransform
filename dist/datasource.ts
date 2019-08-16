@@ -75,9 +75,11 @@ export default class MixTransformDatasource {
                         data[shiftedIndex].target += this.timeshiftSuffixes[options.panelId];
                         _.forEach(data[shiftedIndex].datapoints, (v, k) => {
                             // overriding timestamps in the shifted series
-                            data[shiftedIndex].datapoints[k][1] = data[originalIndex].datapoints[k]
-                                ? data[originalIndex].datapoints[k][1]
-                                : undefined;
+                            if (data[originalIndex].datapoints[k]) {
+                                data[shiftedIndex].datapoints[k][1] = data[originalIndex].datapoints[k][1];
+                            } else {
+                                data[shiftedIndex].datapoints.splice(k, 1);
+                            }
                         });
                     }
                 });
