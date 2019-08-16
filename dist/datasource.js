@@ -72,7 +72,9 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                                     }
                                     data[shiftedIndex_1].target += _this.timeshiftSuffixes[options.panelId];
                                     lodash_1.default.forEach(data[shiftedIndex_1].datapoints, function (v, k) {
-                                        data[shiftedIndex_1].datapoints[k][1] = data[originalIndex_1].datapoints[k][1];
+                                        data[shiftedIndex_1].datapoints[k][1] = data[originalIndex_1].datapoints[k]
+                                            ? data[originalIndex_1].datapoints[k][1]
+                                            : undefined;
                                     });
                                 }
                             });
