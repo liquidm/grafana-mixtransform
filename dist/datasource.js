@@ -71,14 +71,12 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                                         shiftedIndex_1 = secondIndex;
                                     }
                                     data[shiftedIndex_1].target += _this.timeshiftSuffixes[options.panelId];
-                                    lodash_1.default.forEach(data[shiftedIndex_1].datapoints, function (v, k) {
+                                    data[shiftedIndex_1].datapoints = lodash_1.default.map(data[shiftedIndex_1].datapoints, function (v, k) {
                                         if (data[originalIndex_1].datapoints[k]) {
                                             data[shiftedIndex_1].datapoints[k][1] = data[originalIndex_1].datapoints[k][1];
+                                            return data[shiftedIndex_1].datapoints[k];
                                         }
-                                        else {
-                                            data[shiftedIndex_1].datapoints.splice(k, 1);
-                                        }
-                                    });
+                                    }).filter(function (v) { return v; });
                                 }
                             });
                             lodash_1.default.forEach(_this.transformers[options.panelId], function (t) {
