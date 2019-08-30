@@ -86,7 +86,7 @@ export default class MixTransformDatasource {
                 // apply transformers
                 _.forEach(this.transformers[options.panelId], t => {
                     if (t.queryType === 'each') {
-                        if (_.find(data, d => Number.isInteger(parseInt(d.target)))) {
+                        if (_.find(data, d => Number.isInteger(parseInt(d.target)) || (d.target === 'null'))) {
                             this.transformEachWithArray(t, data);
                         } else {
                             this.transformEachWithObjects(t, data);

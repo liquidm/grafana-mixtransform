@@ -25,7 +25,7 @@
       {"name": "GitHub", "url": "https://github.com/liquidm/grafana-mixtransform"},
       {"name": "MIT License", "url": "https://github.com/liquidm/grafana-mixtransform/blob/master/LICENSE"}
     ],
-    "version": "1.0.8",
+    "version": "1.0.9",
     "updated": "2019-05-10"
   },
 
