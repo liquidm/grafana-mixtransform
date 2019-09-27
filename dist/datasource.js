@@ -288,6 +288,22 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                             res.low[i] = [res.average[i][0] - dev / 2, res.raw[i][1]];
                         }
                         return this['_'].reduce(res, function (a, v, k) { a.push({ target: name + '_' + k, datapoints: v }); return a; }, []);
+                    },
+                    collapseDatapoints: function (allowedValues, data, label) {
+                        if (!allowedValues || !allowedValues.length)
+                            return data;
+                        var aggregatedDatapoints = data
+                            .map(function (d) { return allowedValues.indexOf(d.target) < 0 ? d.datapoints : undefined; })
+                            .filter(function (v) { return v; })
+                            .reduce(function (a, cv) {
+                            lodash_1.default.forEach(cv, function (dp) { return a[dp[1]] = (a[dp[1]] || 0) + dp[0]; });
+                            return a;
+                        }, {});
+                        var newDatapoints = [];
+                        Object.keys(aggregatedDatapoints).sort().forEach(function (k) { return newDatapoints.push([aggregatedDatapoints[k], k]); });
+                        data = data.filter(function (d) { return allowedValues.indexOf(d.target) >= 0; });
+                        data.push({ target: label || 'others', datapoints: newDatapoints });
+                        return data;
                     }
                 };
                 return MixTransformDatasource;
