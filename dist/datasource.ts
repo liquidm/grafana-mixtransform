@@ -310,7 +310,7 @@ export default class MixTransformDatasource {
                 .map(d => allowedValues.indexOf(d.target) < 0 ? d.datapoints : undefined)
                 .filter(v => v)
                 .reduce((a, cv) => {
-                    _.forEach(cv, dp => a[dp[1]] = (a[dp[1]] || 0) + dp[0]);
+                    this['_'].forEach(cv, dp => a[dp[1]] = (a[dp[1]] || 0) + dp[0]);
                     return a;
                 }, {});
             var newDatapoints = [];

@@ -290,13 +290,14 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         return this['_'].reduce(res, function (a, v, k) { a.push({ target: name + '_' + k, datapoints: v }); return a; }, []);
                     },
                     collapseDatapoints: function (allowedValues, data, label) {
+                        var _this = this;
                         if (!allowedValues || !allowedValues.length)
                             return data;
                         var aggregatedDatapoints = data
                             .map(function (d) { return allowedValues.indexOf(d.target) < 0 ? d.datapoints : undefined; })
                             .filter(function (v) { return v; })
                             .reduce(function (a, cv) {
-                            lodash_1.default.forEach(cv, function (dp) { return a[dp[1]] = (a[dp[1]] || 0) + dp[0]; });
+                            _this['_'].forEach(cv, function (dp) { return a[dp[1]] = (a[dp[1]] || 0) + dp[0]; });
                             return a;
                         }, {});
                         var newDatapoints = [];
