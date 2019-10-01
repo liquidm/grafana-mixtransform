@@ -294,7 +294,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         if (!allowedValues || !allowedValues.length)
                             return data;
                         var aggregatedDatapoints = data
-                            .map(function (d) { return (d.target && allowedValues.find(function (v) { return d.target.match(v); })) ? d.datapoints : undefined; })
+                            .map(function (d) { return !(d.target && allowedValues.find(function (v) { return d.target.match(v); })) ? d.datapoints : undefined; })
                             .filter(function (v) { return v; })
                             .reduce(function (a, cv) {
                             _this['_'].forEach(cv, function (dp) { return a[dp[1]] = (a[dp[1]] || 0) + dp[0]; });

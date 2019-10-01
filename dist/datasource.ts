@@ -307,7 +307,7 @@ export default class MixTransformDatasource {
         collapseDatapoints: function(allowedValues, data, label) {
             if (!allowedValues || !allowedValues.length) return data;
             var aggregatedDatapoints = data
-                .map(d => (d.target && allowedValues.find(v => d.target.match(v))) ? d.datapoints : undefined)
+                .map(d => !(d.target && allowedValues.find(v => d.target.match(v))) ? d.datapoints : undefined)
                 .filter(v => v)
                 .reduce((a, cv) => {
                     this['_'].forEach(cv, dp => a[dp[1]] = (a[dp[1]] || 0) + dp[0]);
