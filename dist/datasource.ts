@@ -307,7 +307,7 @@ export default class MixTransformDatasource {
         collapseDatapoints: function(allowedValues, data, label) {
             if (!allowedValues || !allowedValues.length) return data;
             var aggregatedDatapoints = data
-                .map(d => allowedValues.indexOf(d.target) < 0 ? d.datapoints : undefined)
+                .map(d => (d.target && allowedValues.find(v => d.target.match(v))) ? d.datapoints : undefined)
                 .filter(v => v)
                 .reduce((a, cv) => {
                     this['_'].forEach(cv, dp => a[dp[1]] = (a[dp[1]] || 0) + dp[0]);
@@ -315,7 +315,7 @@ export default class MixTransformDatasource {
                 }, {});
             var newDatapoints = [];
             Object.keys(aggregatedDatapoints ).sort().forEach(k => newDatapoints.push([aggregatedDatapoints[k], k]));
-            data = data.filter(d => allowedValues.indexOf(d.target) >= 0);
+            data = data.filter(d => (d.target && allowedValues.find(v => d.target.match(v))));
             data.push({target: label || 'others', datapoints: newDatapoints});
             return data;
         }

@@ -294,7 +294,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         if (!allowedValues || !allowedValues.length)
                             return data;
                         var aggregatedDatapoints = data
-                            .map(function (d) { return allowedValues.indexOf(d.target) < 0 ? d.datapoints : undefined; })
+                            .map(function (d) { return (d.target && allowedValues.find(function (v) { return d.target.match(v); })) ? d.datapoints : undefined; })
                             .filter(function (v) { return v; })
                             .reduce(function (a, cv) {
                             _this['_'].forEach(cv, function (dp) { return a[dp[1]] = (a[dp[1]] || 0) + dp[0]; });
@@ -302,7 +302,7 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         }, {});
                         var newDatapoints = [];
                         Object.keys(aggregatedDatapoints).sort().forEach(function (k) { return newDatapoints.push([aggregatedDatapoints[k], k]); });
-                        data = data.filter(function (d) { return allowedValues.indexOf(d.target) >= 0; });
+                        data = data.filter(function (d) { return (d.target && allowedValues.find(function (v) { return d.target.match(v); })); });
                         data.push({ target: label || 'others', datapoints: newDatapoints });
                         return data;
                     }
