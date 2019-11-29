@@ -305,6 +305,15 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                         data = data.filter(function (d) { return (d.target && allowedValues.find(function (v) { return d.target.match(v); })); });
                         data.push({ target: label || 'others', datapoints: newDatapoints });
                         return data;
+                    },
+                    humanizeVariable: function (datasource, varName, config, id) {
+                        if (!varName || !datasource || !datasource.templateSrv)
+                            return id;
+                        if (config && config.mapValues && config.mapValues.varMap[varName])
+                            varName = config.mapValues.varMap[varName];
+                        if (!datasource.templateSrv.index[varName])
+                            return id;
+                        return (datasource.templateSrv.index[varName].options.find(function (e) { return e.value == id; }) || {}).text || id;
                     }
                 };
                 return MixTransformDatasource;

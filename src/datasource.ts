@@ -318,6 +318,13 @@ export default class MixTransformDatasource {
             data = data.filter(d => (d.target && allowedValues.find(v => d.target.match(v))));
             data.push({target: label || 'others', datapoints: newDatapoints});
             return data;
+        },
+        humanizeVariable(datasource, varName, config, id) {
+            if (!varName || !datasource || !datasource.templateSrv) return id;
+            if (config && config.mapValues && config.mapValues.varMap[varName]) varName = config.mapValues.varMap[varName];
+            if (!datasource.templateSrv.index[varName]) return id;
+            // == is intentional!
+            return (datasource.templateSrv.index[varName].options.find(e => e.value == id) || {}).text || id;
         }
     };
 
