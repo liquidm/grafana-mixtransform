@@ -1,9 +1,8 @@
 ## Mix & Transform
-
 Mix & Transform is a special datasource which allows to execute 
 arbitrary operations over the results from multiple datasources.
 
-### Query type `Each` 
+## Query type `Each` 
 Executes the callback for each datapoint
 ```
 function callback(datasource, datapoint, values) { ... }
@@ -24,7 +23,30 @@ Executes the callback once for the whole `data` object
 ```
 function callback(datasource, data) { ... }
 ```
-### Moving average
+
+### Timeshift
+Setting the timeshift field makes the plugin to execute two identical queries except the second one has start/end date shifted by the specified value. The datapoints in the result then shifted back and each data series of the original query is duplicated with a new one (with xxx_previous name by default).
+
+## Built-in functions
+### Humanize variable
+Uses the Grafana variables available for this board to replace IDs with human-friendly names:
+```
+var config = {
+    "mapValues": {
+        "varMap": {
+            "advertiser_company": "advertiser",
+            "account": "ssp",
+            "media_type": "mediatype"
+        }
+    }
+};
+_.forEach(data, d => {
+    if (d.target) d.target = humanizeVariable(datasource, '$groupby', config, d.target);
+    if (d.rows) _.forEach(d.rows, (v, k) => d.rows[k][0] = humanizeVariable(datasource, '$groupby', config, d.rows[k][0]));
+});
+```
+
+### Moving average and weighted moving average
 Use with query type `Callback`.
 Standard moving average:
 ```
@@ -41,13 +63,20 @@ if (data.length > 0) {
 Weighted versions `movingWAverage` and `movingWAverageRange` use decremental 
 weights for the previous datapoings - depth, depth - 1, ..., 1. 
 
+### Collapsing datapoints
+collapseDatapoints allows to filter only meaningful series and collapse everything else into "other" category.
+```
+if ('$allowedValues') data = collapseDatapoints('$allowedValues'.split(','), data);
+return data;
+```
 
-### Hints
+
+## Hints
 
 - Lodash is available as `_` variable
 - Access the datasource parameters with `this`, e.g. `this.queryType`, `this.refId`
 
-### Known limitations
+## Known limitations
 
 - Only the first timeshift is applied, it's not possible to add several shifts. 
 - Only timeshift in the past is possible
