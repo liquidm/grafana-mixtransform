@@ -311,9 +311,13 @@ System.register(["lodash", "angular", "./utils/parseDuration"], function (export
                             return id;
                         if (config && config.mapValues && config.mapValues.varMap[varName])
                             varName = config.mapValues.varMap[varName];
-                        if (!datasource.templateSrv.index[varName])
+                        var templateVar = datasource.templateSrv.index[varName] || datasource.templateSrv.getVariables().find(function (e) { return e.name == varName; });
+                        if (!templateVar)
                             return id;
-                        return (datasource.templateSrv.index[varName].options.find(function (e) { return e.value == id; }) || {}).text || id;
+                        var templateOpt = templateVar.options.find(function (e) { return e.value.split(",").includes(id); });
+                        if (!templateOpt)
+                            return id;
+                        return templateOpt.text;
                     }
                 };
                 return MixTransformDatasource;
