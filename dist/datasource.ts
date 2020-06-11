@@ -322,9 +322,14 @@ export default class MixTransformDatasource {
         humanizeVariable(datasource, varName, config, id) {
             if (!varName || !datasource || !datasource.templateSrv) return id;
             if (config && config.mapValues && config.mapValues.varMap[varName]) varName = config.mapValues.varMap[varName];
-            if (!datasource.templateSrv.index[varName]) return id;
-            // == is intentional!
-            return (datasource.templateSrv.index[varName].options.find(e => e.value == id) || {}).text || id;
+
+            var templateVar = datasource.templateSrv.index[varName] || datasource.templateSrv.getVariables().find(e => e.name == varName);
+            if (!templateVar) return id;
+
+            var templateOpt = templateVar.options.find(e => e.value.split(",").includes(id));
+            if (!templateOpt) return id;
+
+            return templateOpt.text;
         }
     };
 
